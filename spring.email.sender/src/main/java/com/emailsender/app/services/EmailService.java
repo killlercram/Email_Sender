@@ -1,6 +1,7 @@
 package com.emailsender.app.services;
 
 import java.io.File;
+import java.io.InputStream;
 
 public interface EmailService {
 
@@ -15,4 +16,7 @@ public interface EmailService {
 
     //Sending email with file
     void sendEmailWithFile(String to, String subject, String message, File file);
+
+    //Sending Files dynamically
+    void sendEmailWithFile(String to , String subject, String message, InputStream is);
 }

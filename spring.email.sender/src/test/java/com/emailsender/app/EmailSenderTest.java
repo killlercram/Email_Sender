@@ -6,6 +6,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.sql.SQLOutput;
 
 @SpringBootTest
@@ -27,6 +31,32 @@ public class EmailSenderTest {
                 "";
         System.out.println("Html Content sent.");
         emailService.sendEmailWithHtml("mailforshashwattandon@gmail.com","Email Testing",html);
+
+    }
+
+    //Testing for sending the file
+    @Test
+    void sendEmailFile(){
+        System.out.println("Sending mail after verifying");
+        emailService.sendEmailWithFile("mailforshashwattandon@gmail.com",
+                "sending the file",
+                "Testing for sending files via Emails.",
+                new File("/home/killercram/Email_Project/spring.email.sender/src/resources/static/images/harsh.jpg"));
+    }
+    @Test
+    void sendEmailFileWithStream(){
+        System.out.println("Sending mail after verifying");
+        File file=new File( "/home/killercram/Email_Project/spring.email.sender/src/resources/static/images/harsh.jpg");
+        try {
+            InputStream is=new FileInputStream(file);
+            emailService.sendEmailWithFile("mailforshashwattandon@gmail.com",
+                    "sending the file",
+                    "Testing for sending files via Emails.",is
+                    );
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
 
     }
 }
