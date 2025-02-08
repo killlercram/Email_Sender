@@ -100,7 +100,7 @@ public class EmailServiceImpl implements EmailService {
             helper.setTo(to);
             helper.setFrom("Shashwattandon@gmail.com");
             helper.setSubject(subject);
-            helper.setText(message);
+            helper.setText(message,true);
             //This will ge the file details
             File file=new File("//home/killercram/Email_Project/spring.email.sender/src/resources/static/images/test.png");
             Files.copy(is,file.toPath(), StandardCopyOption.REPLACE_EXISTING);
