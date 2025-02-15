@@ -92,13 +92,6 @@ function EmailSender() {
           {/* For Text Area */}
           <div className="input_message mt-4">
             <label className="block mb-0.5">Your Message:</label>
-            {/* <textarea
-              value={emailData.message}
-              onChange={(event) => handleFieldChange(event, "message")}
-              placeholder="Write your thoughts here..."
-              rows={5}
-              className="textarea textarea-bordered textarea-lg w-full "
-            ></textarea> */}
 
             <JoditEditor
               ref={editor}
