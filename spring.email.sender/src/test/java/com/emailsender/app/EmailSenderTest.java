@@ -56,9 +56,14 @@ public class EmailSenderTest {
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
-
-
     }
+
+    //Receiving Email Test
+    @Test
+    void getInbox(){
+        emailService.getInboxMessages();
+    }
+
 }
 
 

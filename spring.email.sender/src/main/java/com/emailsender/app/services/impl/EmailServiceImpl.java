@@ -1,10 +1,12 @@
 package com.emailsender.app.services.impl;
 
+import com.emailsender.app.helper.Messages;
 import com.emailsender.app.services.EmailService;
-import jakarta.mail.MessagingException;
+import jakarta.mail.*;
 import jakarta.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -16,6 +18,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+
 
 @Service
 public class EmailServiceImpl implements EmailService {
@@ -36,7 +42,7 @@ public class EmailServiceImpl implements EmailService {
         simpleMailMessage.setTo(to);//to whom we have to send mail
         simpleMailMessage.setSubject(subject);//what is the subject of mail
         simpleMailMessage.setText(message);//message to sent
-        simpleMailMessage.setFrom("herosviral@gmail.com");
+        simpleMailMessage.setFrom("Shashwat_Tandon");
         mailSender.send(simpleMailMessage);
         logger.info("Email has been sent..");
     }
@@ -47,7 +53,7 @@ public class EmailServiceImpl implements EmailService {
         simpleMailMessage.setTo(to);
         simpleMailMessage.setSubject(subject);
         simpleMailMessage.setText(message);
-        simpleMailMessage.setFrom("hersoviral@gmail.com");
+        simpleMailMessage.setFrom("Shashwat_Tandon");
         mailSender.send(simpleMailMessage);
         logger.info("Email Sent..");
     }
@@ -60,7 +66,7 @@ public class EmailServiceImpl implements EmailService {
             helper.setTo(to);
             helper.setSubject(subject);
             helper.setText(htmlContent,true);
-            helper.setFrom("herosviral@gmail.com");
+            helper.setFrom("Shashwat_Tandon");
             mailSender.send((mimeMessage));
             logger.info("Email Sent..");
 
@@ -116,6 +122,67 @@ public class EmailServiceImpl implements EmailService {
             throw new RuntimeException(e);
         }
 
+    }
+    @Value("${mail.store.protocol}")
+    String protocol;
+    @Value("${mail.imaps.host}")
+    String host;
+    @Value("${mail.imaps.port}")
+    String port;
+
+   @Value("${spring.mail.username}")
+    String userName;
+    @Value("${spring.mail.password}")
+    String password;
+
+    @Override
+    public List<Messages> getInboxMessages() {
+        //code to receive all emails
+        Properties configurations=new Properties();
+        configurations.setProperty("mail.store.protocol",protocol);
+        configurations.setProperty("mail.imaps.host",host);
+        configurations.setProperty("mail.imaps.port",port);
+
+        Session session=Session.getDefaultInstance(configurations);
+        try {
+            Store store= session.getStore();//store made
+            store.connect(userName,password);
+            //got the Folder
+            Folder inbox = store.getFolder("INBOX");
+            //opening Folder
+            inbox.open(Folder.READ_ONLY);
+            //getting All messages Array
+            jakarta.mail.Message[] messages=inbox.getMessages();
+            //Now we can go through all the message
+
+            List<Messages> list=new ArrayList<>();
+            int count=0;
+            if(messages.length>10) {
+                for (int i = messages.length - 1; i >= messages.length - 10; i--) {
+                    if (count >= 10) {
+                        break;
+                    } else {
+                        System.out.println(messages[i].getSubject());
+                        System.out.println("______________");
+                        list.add(Messages.builder().subjects(messages[i].getSubject()).build());
+                    }
+                    count++;
+                }
+            }else {
+                for (jakarta.mail.Message message : messages) {
+
+                    System.out.println(message.getSubject());
+                    System.out.println("______________****____________________");
+                    list.add(Messages.builder().subjects(message.getSubject()).build());
+                }
+            }
+            return list;
+        } catch (NoSuchProviderException e) {
+            throw new RuntimeException(e);
+        } catch (MessagingException e) {
+            throw new RuntimeException(e);
+        }
+        
     }
 
 }

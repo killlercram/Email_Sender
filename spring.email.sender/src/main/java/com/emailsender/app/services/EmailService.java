@@ -1,7 +1,10 @@
 package com.emailsender.app.services;
 
+import com.emailsender.app.helper.Messages;
+
 import java.io.File;
 import java.io.InputStream;
+import java.util.List;
 
 public interface EmailService {
 
@@ -19,4 +22,7 @@ public interface EmailService {
 
     //Sending Files dynamically
     void sendEmailWithFile(String to , String subject, String message, InputStream is);
+
+   //Listing all the messages in inbox
+    List<Messages> getInboxMessages();
 }
