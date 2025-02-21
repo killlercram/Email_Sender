@@ -123,6 +123,8 @@ public class EmailServiceImpl implements EmailService {
         }
 
     }
+
+    //Receiving Emails
     @Value("${mail.store.protocol}")
     String protocol;
     @Value("${mail.imaps.host}")
@@ -139,50 +141,79 @@ public class EmailServiceImpl implements EmailService {
     public List<Messages> getInboxMessages() {
         //code to receive all emails
         Properties configurations=new Properties();
-        configurations.setProperty("mail.store.protocol",protocol);
+        configurations.setProperty("mail.store.protocol","imaps");
         configurations.setProperty("mail.imaps.host",host);
         configurations.setProperty("mail.imaps.port",port);
 
         Session session=Session.getDefaultInstance(configurations);
         try {
-            Store store= session.getStore();//store made
+            Store store= session.getStore(protocol);//store made
             store.connect(userName,password);
-            //got the Folder
+            //got the Folder from the store
             Folder inbox = store.getFolder("INBOX");
             //opening Folder
             inbox.open(Folder.READ_ONLY);
             //getting All messages Array
             jakarta.mail.Message[] messages=inbox.getMessages();
             //Now we can go through all the message
-
             List<Messages> list=new ArrayList<>();
-            int count=0;
-            if(messages.length>10) {
-                for (int i = messages.length - 1; i >= messages.length - 10; i--) {
-                    if (count >= 10) {
-                        break;
-                    } else {
-                        System.out.println(messages[i].getSubject());
-                        System.out.println("______________");
-                        list.add(Messages.builder().subjects(messages[i].getSubject()).build());
-                    }
-                    count++;
-                }
-            }else {
-                for (jakarta.mail.Message message : messages) {
 
-                    System.out.println(message.getSubject());
-                    System.out.println("______________****____________________");
-                    list.add(Messages.builder().subjects(message.getSubject()).build());
+                for (jakarta.mail.Message message : messages) {
+//                    System.out.println(message.getSubject());
+                    String content=getContentFromEmailMessage(message);
+                    List<String> files=getFilesFromEmailMessage(message);
+//                    System.out.println("______________****____________________");
+                    list.add(Messages.builder().subjects(message.getSubject()).content(content).files(files).build());
                 }
-            }
+
             return list;
         } catch (NoSuchProviderException e) {
             throw new RuntimeException(e);
-        } catch (MessagingException e) {
+        } catch (MessagingException | IOException e) {
             throw new RuntimeException(e);
         }
         
     }
+
+    private List<String> getFilesFromEmailMessage(Message message) throws MessagingException, IOException {
+        List<String>files=new ArrayList<>();
+        if(message.isMimeType("multipart/*")){
+            Multipart content=(Multipart)message.getContent();
+            for(int i=0;i<content.getCount();i++){
+                BodyPart bodyPart=content.getBodyPart(i);
+                if(Part.ATTACHMENT.equalsIgnoreCase(bodyPart.getDisposition())){//attachment is present
+
+                    InputStream inputStream=bodyPart.getInputStream();
+                    File file=new
+                            File("/home/killercram/Email_Project/spring.email.sender/src/resources/email"
+                            +
+                            bodyPart.getFileName());
+                    Files.copy(inputStream,file.toPath(),StandardCopyOption.REPLACE_EXISTING);
+                    files.add((file.getAbsolutePath()));
+
+                }
+            }
+        }
+        return files;
+    }
+
+    private String getContentFromEmailMessage(Message message) throws MessagingException, IOException {
+        if(message.isMimeType("text/plain")
+                || message.isMimeType("text/html")){
+           String content=(String)message.getContent();
+           return content;
+        }else if(message.isMimeType("multipart/*")) {
+            Multipart part = (Multipart) message.getContent();
+            for (int i = 0; i < part.getCount(); i++) {
+                BodyPart bodyPart = part.getBodyPart(i);
+                if (bodyPart.isMimeType("text/plain")){
+
+                    return (String) bodyPart.getContent();
+                }
+            }
+        }
+        return null;
+    }
+
 
 }

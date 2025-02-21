@@ -1,7 +1,9 @@
 package com.emailsender.app;
 
+import com.emailsender.app.helper.Messages;
 import com.emailsender.app.services.EmailService;
 import com.emailsender.app.services.impl.EmailServiceImpl;
+import jakarta.mail.Message;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -11,6 +13,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.sql.SQLOutput;
+import java.util.List;
 
 @SpringBootTest
 public class EmailSenderTest {
@@ -61,7 +64,15 @@ public class EmailSenderTest {
     //Receiving Email Test
     @Test
     void getInbox(){
-        emailService.getInboxMessages();
+      List<Messages> inboxMessages= emailService.getInboxMessages();
+      inboxMessages.forEach(items -> {
+          System.out.println(items.getSubjects());
+          System.out.println(items.getContent());
+          System.out.println(items.getFiles());
+          System.out.println("__________________");
+
+      });
+
     }
 
 }
